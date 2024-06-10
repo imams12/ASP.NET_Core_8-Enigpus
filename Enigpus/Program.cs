@@ -1,3 +1,18 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Enigpus.Services.Impls;
+using Enigpus.Views;
 
-Console.WriteLine("Hello, World!");
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        Run();
+    }
+
+    public static void Run()
+    {
+        var inventoryService = new InventoryServiceImpl();
+
+        var view = new View(inventoryService);
+        view.Run();
+    }
+}
