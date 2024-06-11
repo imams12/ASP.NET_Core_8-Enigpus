@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Enigpus.Models;
 using Enigpus.Services;
 using Enigpus.Utils;
@@ -31,7 +32,7 @@ public class View
                         SearchBook();
                         break;
                     case "3":
-                        EditBook();
+                        Console.WriteLine(EditBook());
                         break;
                     case "4":
                         DeleteBook();
@@ -79,33 +80,98 @@ public class View
             Console.WriteLine("Invalid book type");
         }
 
-        var code = Utility.InputString("Enter book code (ex: A1): ");
+        string code;
+        while (true)
+        {
+            code = Utility.InputString("Enter book code (ex: A1): ");
+            if (Regex.IsMatch(code, @"^[A-Za-z]\d+$"))
+            {
+                break;   
+            }
+            Console.WriteLine("Invalid code");
+        }
         
         var title = Utility.InputString("Enter book title: ");
         var publisher = Utility.InputString("Enter publisher: ");
-        var publishedYear = Utility.InputNumber("Enter year of publication: ");
+
+        int publishedYear;
+        while (true)
+        {
+            var input = Utility.InputString("Enter year of publication: ");
+            if (Regex.IsMatch(input, @"^\d{4}$"))
+            {
+                publishedYear = Convert.ToInt32(input);
+                break;
+            }
+
+            Console.WriteLine("Invalid year of publication");
+        }
 
         if (type == "1")
         {
             var author = Utility.InputString("Enter author: ");
-            _inventoryService.AddBook(new Novel
+            string confirmation;
+            while (true)
             {
-                Code = code,
-                Title = title,
-                Publisher = publisher,
-                PublishedYear = publishedYear,
-                Author = author
-            });
+                Console.WriteLine("Do you want to save this book? (yes/no)");
+                confirmation = Console.ReadLine().ToLower();
+                if (confirmation == "yes" || confirmation == "no")
+                {
+                    break;
+                }
+
+                Console.WriteLine("Invalid input");
+            }
+            if (confirmation.Equals("no"))
+            {
+                Console.WriteLine("Book has not been saved");
+            }
+            else
+            {
+                _inventoryService.AddBook(new Novel
+                {
+                    Code = code,
+                    Title = title,
+                    Publisher = publisher,
+                    PublishedYear = publishedYear,
+                    Author = author
+                });
+
+                Console.WriteLine("Book has been saved successfully");
+            }
+            
         }
         else if (type == "2")
         {
-            _inventoryService.AddBook(new Magazine
+            string confirmation;
+            while (true)
             {
-                Code = code,
-                Title = title,
-                Publisher = publisher,
-                PublishedYear = publishedYear,
-            });
+                Console.WriteLine("Do you want to save this book? (yes/no)");
+                confirmation = Console.ReadLine().ToLower();
+                if (confirmation == "yes" || confirmation == "no")
+                {
+                    break;
+                }
+
+                Console.WriteLine("Invalid input");
+            }
+            if (confirmation.Equals("no"))
+            {
+                Console.WriteLine("Book has not been saved");
+            }
+            else
+            {
+                _inventoryService.AddBook(new Magazine
+                {
+                    Code = code,
+                    Title = title,
+                    Publisher = publisher,
+                    PublishedYear = publishedYear,
+                });
+            
+                Console.WriteLine("Book has been saved successfully");
+            }
+            
         }
     }
 
@@ -128,12 +194,38 @@ public class View
             }
         }
 
-        private void EditBook()
+        private string EditBook()
         {
-            var code = Utility.InputString("Enter book code to edit (ex: A1): ");
-            var title = Utility.InputString("Enter new title: ");
-            var publisher = Utility.InputString("Enter new publisher: ");
-            var year = Utility.InputNumber("Enter new year of publication: ");
+            if (_inventoryService.getAllBooks().Count() == 0)
+            {
+                 return "There is no book in inventory";
+            }
+            string code;
+            while (true)
+            {
+                code = Utility.InputString("Enter book code (ex: A1): ");
+                if (Regex.IsMatch(code, @"^[A-Za-z]\d+$"))
+                {
+                    break;   
+                }
+                Console.WriteLine("Invalid code");
+            }
+        
+            var title = Utility.InputString("Enter book title: ");
+            var publisher = Utility.InputString("Enter publisher: ");
+
+            int year;
+            while (true)
+            {
+                var input = Utility.InputString("Enter year of publication: ");
+                if (Regex.IsMatch(input, @"^\d{4}$"))
+                {
+                    year = Convert.ToInt32(input);
+                    break;
+                }
+
+                Console.WriteLine("Invalid year of publication");
+            }
             string author = null;
             
             var book = _inventoryService.searchBookById(code);
@@ -147,6 +239,8 @@ public class View
                 : new Novel { Code = code, Title = title, Publisher = publisher, PublishedYear = year, Author = author };
             
             _inventoryService.UpdateBook(updatedBook);
+
+            return $"Book with {code} updated successfully";
         }
 
         private void DeleteBook()
