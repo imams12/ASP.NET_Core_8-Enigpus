@@ -29,7 +29,7 @@ public class View
                         AddBook();
                         break;
                     case "2":
-                        SearchBook();
+                        Console.WriteLine(SearchBook());
                         break;
                     case "3":
                         Console.WriteLine(EditBook());
@@ -175,23 +175,28 @@ public class View
         }
     }
 
-    private void SearchBook()
+    private string SearchBook()
         {
+            if (_inventoryService.getAllBooks().Count() == 0)
+            {
+                return "There is no book in inventory";
+            }
             var title = Utility.InputString("Enter book title to search: ");
             var book = _inventoryService.SearchBookByTitle(title);
 
+            string output;
             if (book != null)
             {
-                Console.WriteLine($"Book found: Code={book.Code}, Title={book.Title}, Publisher={book.Publisher}, Year={book.PublishedYear}");
+                output = $"Book found: Code={book.Code}, Title={book.Title}, Publisher={book.Publisher}, Year={book.PublishedYear}";
                 if (book is Novel novel)
                 {
-                    Console.WriteLine($"Author: {novel.Author}");
+                    string.Join(output, $" Author: {novel.Author}") ;
                 }
+
+                return output;
             }
-            else
-            {
-                Console.WriteLine("Book not found.");
-            }
+
+            return $"Book with the title {title} not found";
         }
 
         private string EditBook()
