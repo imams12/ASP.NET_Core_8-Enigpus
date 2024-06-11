@@ -20,6 +20,7 @@ public class View
         while (!choice.Equals("6"))
         {
             displayMenu();
+            Console.WriteLine();
             try
             {
                 choice = Console.ReadLine();
@@ -35,10 +36,10 @@ public class View
                         Console.WriteLine(EditBook());
                         break;
                     case "4":
-                        DeleteBook();
+                        Console.WriteLine(DeleteBook());
                         break;
                     case "5":
-                        ViewAllBooks();
+                        Console.WriteLine(ViewAllBooks());
                         break;
                     case "6":
                         Console.WriteLine("Exiting....");
@@ -238,24 +239,79 @@ public class View
             {
                 author = Utility.InputString("Enter new author: ");
             }
-
-            Book updatedBook = string.IsNullOrEmpty(author)
-                ? new Magazine { Code = code, Title = title, Publisher = publisher, PublishedYear = year }
-                : new Novel { Code = code, Title = title, Publisher = publisher, PublishedYear = year, Author = author };
             
-            _inventoryService.UpdateBook(updatedBook);
+            string confirmation;
+            string output;
+            while (true)
+            {
+                Console.WriteLine("Do you want to update this book? (yes/no)");
+                confirmation = Console.ReadLine().ToLower();
+                if (confirmation == "yes" || confirmation == "no")
+                {
+                    break;
+                }
 
-            return $"Book with {code} updated successfully";
+                Console.WriteLine("Invalid input");
+            }
+            if (confirmation.Equals("no"))
+            {
+                output = $"Book with {code} has not been updated";
+            }
+            else
+            {
+                Book updatedBook = string.IsNullOrEmpty(author)
+                    ? new Magazine { Code = code, Title = title, Publisher = publisher, PublishedYear = year }
+                    : new Novel { Code = code, Title = title, Publisher = publisher, PublishedYear = year, Author = author };
+            
+                _inventoryService.UpdateBook(updatedBook);
+
+                output = $"Book with {code} updated successfully";
+            }
+
+            return output;
         }
 
-        private void DeleteBook()
+        private string DeleteBook()
         {
+            if (_inventoryService.getAllBooks().Count() == 0)
+            {
+                return "There is no book in inventory";
+            }
             var code = Utility.InputString("Enter book code to delete: (ex: A1): ");
-            _inventoryService.DeleteBook(code);
+            
+            string confirmation;
+            string output;
+            while (true)
+            {
+                Console.WriteLine("Do you want to delete this book? (yes/no)");
+                confirmation = Console.ReadLine().ToLower();
+                if (confirmation == "yes" || confirmation == "no")
+                {
+                    break;
+                }
+
+                Console.WriteLine("Invalid input");
+            }
+            if (confirmation.Equals("no"))
+            {
+                output = "Book has not been deleted";
+            }
+            else
+            {
+                _inventoryService.DeleteBook(code);
+
+                output = $"Book with {code} deleted successfully";
+            }
+
+            return output;
         }
 
-        private void ViewAllBooks()
+        private string ViewAllBooks()
         {
+            if (_inventoryService.getAllBooks().Count() == 0)
+            {
+                return "There is no book in inventory";
+            }
             var books = _inventoryService.getAllBooks();
             foreach (var book in books)
             {
@@ -265,5 +321,7 @@ public class View
                     Console.WriteLine($"Author: {novel.Author}");
                 }
             }
+
+            return"";
         }
 }
